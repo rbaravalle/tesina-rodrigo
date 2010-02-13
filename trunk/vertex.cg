@@ -1,0 +1,63 @@
+#define CANT 3
+
+float2 _rotar(float2 texCoord, float angle)
+{
+      float2 aux = texCoord;
+
+      if(angle != 0)
+      {
+          aux -= float2(0.5,0.5);
+
+          float cos, sin;
+          float2 temp;
+          sincos(angle, sin, cos);
+
+          temp.x = cos * (aux.x) +
+                           -sin * (aux.y);
+          temp.y = sin * (aux.x) +
+                            cos * (aux.y);
+
+          aux = temp;
+          aux += float2(0.5,0.5);
+      }
+
+      return aux;
+}
+
+float2 _desplazar(float2 texCoord, float dx, float dy)
+{
+    return texCoord + float2(dx,dy);
+}
+
+
+void main(
+		float2 position : POSITION,
+
+                float2 texCoord0 : TEXCOORD0,
+
+                uniform float angulos[CANT],                uniform float desplazamiento_u[CANT],
+                uniform float desplazamiento_v[CANT],
+		
+		out float4 oPosition     : POSITION,
+
+          out float2 oCoord0  : TEXCOORD0,
+          out float2 oCoord1  : TEXCOORD1,
+          out float2 oCoord2  : TEXCOORD2,
+          out float2 oCoord3  : TEXCOORD3)
+{
+
+
+    oPosition = float4(position, 0, 1);
+
+
+    oCoord0 = _rotar(texCoord0, angulos[0]);
+    oCoord1 = _rotar(texCoord0, angulos[1]);
+    oCoord2 = _rotar(texCoord0, angulos[2]);
+
+    oCoord0 = _desplazar(oCoord0, desplazamiento_u[0],desplazamiento_v[0]);
+    oCoord1 = _desplazar(oCoord1, desplazamiento_u[1],desplazamiento_v[1]);
+    oCoord2 = _desplazar(oCoord2, desplazamiento_u[2],desplazamiento_v[2]);
+
+    oCoord3 = texCoord0;
+
+}

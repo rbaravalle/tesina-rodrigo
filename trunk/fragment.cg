@@ -1,0 +1,144 @@
+#define CANT 3
+
+float2 _rotar(float2 texCoord, float angle)
+{
+      float2 aux = texCoord;
+
+      if(angle != 0)
+      {
+          aux -= float2(0.5,0.5);
+
+          float cos, sin;
+          float2 temp;
+          sincos(angle, sin, cos);
+
+          temp.x = cos * (aux.x) +
+                           -sin * (aux.y);
+          temp.y = sin * (aux.x) +
+                            cos * (aux.y);
+
+          aux = temp;
+          aux += float2(0.5,0.5);
+      }
+
+      return aux;
+}
+
+
+float sobre (float f, float g) {
+    return (f > 0.2 ? f : g);
+}
+
+float combina (float t1, float t2, int i)
+{
+  if (i == 0 )
+      return t1+t2;
+  else { if (i==1) return t1-t2;
+  else {if(i==2) return lerp(t1,t2,0.5); else { 
+            if(i==3) return sobre(t1,t2); else return t1*t2;} }}
+  
+}
+
+
+float resta(float f, float g) {
+    return g > 0.2 ? f-g : f;
+}
+
+float4 main(
+        float2 coord0  : TEXCOORD0,
+        float2 coord1  : TEXCOORD1,
+        float2 coord2  : TEXCOORD2,
+        float2 coord3  : TEXCOORD3,
+
+        uniform float usa[CANT],
+        uniform float amplitud[CANT],
+        uniform float turb[CANT],
+        uniform float escala_u[CANT],
+        uniform float intensidad[CANT],
+
+        uniform int combina1,
+        uniform int combina2,
+
+        uniform sampler2D textura0,
+        uniform sampler2D textura1,
+        uniform sampler2D textura2
+	
+	): COLOR 
+{
+
+    //float base[CANT];
+
+    //base[0] = tex2D(textura0, coord0);
+
+    //base[1] = tex2D(textura1, coord1);
+
+
+
+    float n = tex2D(textura0, float2(mod(coord3.x,256),coord3.y));
+    float n2 = tex2D(textura0, float2(mod(coord3.x,256)/2,mod(coord3.y,256)/2));
+    float n4 = tex2D(textura0, float2(mod(coord3.x,256)/4,mod(coord3.y,256)/4));
+    float n8 = tex2D(textura0, float2(mod(coord3.x,256)/8,mod(coord3.y,256)/8));
+    float n16 =  tex2D(textura0, float2(mod(coord3.x,256)/16,mod(coord3.y,256)/16));
+	
+    float4 color;
+
+    float noise = (n + 2*n2 + 4*n4+ 8*n8 + 16*n16);
+
+    float turbulencia0 = turb[0] * noise;
+    float turbulencia1 = turb[1] * noise;
+    float turbulencia2 = turb[2] * noise;
+
+    float2 c0 = coord0 + float2(turbulencia0,turbulencia0);
+
+    float2 c1 = coord1 + float2(turbulencia1,turbulencia1);
+    float2 c2 = coord2 + float2(turbulencia2,turbulencia2);
+
+    float xf = escala_u[0]*(c0.x-0.5*turb[0]);
+    
+    float xf2 = escala_u[1]*c1.x;
+    float xf3 = escala_u[2]*c2.x;
+
+    int icx = (int)c2.x;
+
+    // la turbulencia no depende de la escala
+    float2 r = _rotar((escala_u[0]/1.5)*c0,1.57);
+
+    float2 r2 = _rotar((escala_u[1]/1.5)*c1,1.57);
+
+//    float b1 = (sin(xf)+1)/2;
+//    float b2 = (sin(xf2)+1)/2;
+    float b1 = (sin(xf)+1)/2;
+    float b2 = (sin(xf2)+1)/2;
+    float b3 = (sin(xf3)+1)/2;
+
+    float t1 = intensidad[0]*b1;
+    float t2 = intensidad[1]*b2;
+    float t3 = intensidad[2]*pow(b3,amplitud[2]);
+
+    float3 col1 = float3(usa[0] ? intensidad[0]*t1: 0, 0,0);
+    float3 col2 = float3(0, usa[1] ? intensidad[1]*t2 : 0, 0);
+    float3 col3 = float3(0,0,usa[2] ? intensidad[2]*t3 : 0);
+
+    float3 col = saturate(saturate(col1+col2)+col3);
+
+    b1 = usa[0] == 1 ? t1 : 0;
+
+    b2 = (usa[1] == 1 ? (usa[0] == 1 ?
+                        combina(b1,t2,combina1): t2) : b1);
+
+    b3 = (usa[2] == 1 ? (usa[1] == 1 || usa[0] == 1 ?
+                        combina(b2,t3,combina2) : t3) : b2);
+
+    float sb3 = saturate(b3);
+
+//    color.xyz = sb3;// + float3(0.4,0.1,0);
+   float i = sobre(sb3,0);
+
+    color.xyz = i > 0.2 ? i + float3(0.6,0.2,0.2) : 0;
+
+    color.a = 1;
+
+    return color;
+}
+
+
