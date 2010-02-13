@@ -2,6 +2,8 @@
 #include <Cg/cg.h>
 #include <Cg/cgGL.h>
 #include <GL/glut.h>
+#include <QTimer>
+
 
 #define CANT_T_PARAMETERS 3
 #define CANT_C_PARAMETERS 2
@@ -14,12 +16,14 @@ class MyGLDrawer : public QGLWidget
 	Q_OBJECT
 
 	public:
-        MyGLDrawer() {};
+        MyGLDrawer(QWidget *parent):QGLWidget(parent) {};
         ~MyGLDrawer() {};
         QSize minimumSizeHint() const;
         QSize sizeHint() const;
 
 	public slots:
+        void update(); // se llama cada segundo
+
         void cambiarAmplitud1(int);
         void cambiarAmplitud2(int);
         void cambiarAmplitud3(int);
@@ -54,7 +58,11 @@ class MyGLDrawer : public QGLWidget
 
         void cambiarCombina1(int);
         void cambiarCombina2(int);
+
+    signals:
+        void cambiarFPS( int );
 		
+
 	private:
 		void initializeGL();
 		void resizeGL(int width, int height);
@@ -62,5 +70,7 @@ class MyGLDrawer : public QGLWidget
 		void keyboard(unsigned char c, int x, int y);
         void _cargar_texturas();
         void _checkForCgError(const char *);
+
+        QTimer *timer;
 
 };

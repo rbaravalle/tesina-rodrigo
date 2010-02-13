@@ -71,6 +71,9 @@ float4 main(
     float n4 = tex2D(textura0, float2(coord3.x/4,coord3.y/4));
     float n8 = tex2D(textura0, float2(coord3.x/8,coord3.y/8));
     float n16 =  tex2D(textura0, float2(coord3.x/16,coord3.y/16));
+
+    float uno =  tex2D(textura1, float2(coord3.x/16,coord3.y/16));
+    float dos =  tex2D(textura2, float2(coord3.x/16,coord3.y/16));
 	
     float4 color;
 
@@ -119,7 +122,7 @@ float4 main(
 
     float sb3 = saturate(b3);
 
-    color.xyz = sb3;// + float3(0.4,0.1,0);
+    color.xyz = sb3 + float3(0.4,0.1,0);
     //float i = sobre(sb3,0);
 
     //color.xyz = i > 0.2 ? i + float3(0.6,0.2,0.2) : 0;
