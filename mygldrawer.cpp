@@ -8,12 +8,14 @@
 
 #include <spotnoise.h>
 
+#include <QTimer>
+
 //***************//
 // CODIGO OPENGL //  
 //***************//
 
-#define NX 512
-#define NY 512
+#define NX 256
+#define NY 256
 
 #define tamanio (NX*NY)
 
@@ -89,12 +91,23 @@ int cArrayParameters[CANT_C_PARAMETERS] = {
     0,0, // funciones de combinacion    
 };
 
+int cuadros = 0;
+int fps = 0;
+
 //*******************//
 // FIN CODIGO OPENGL //
 //*******************//
 
 
 // RUTINAS DE LA CLASE
+
+// contador de fps
+void MyGLDrawer::update()
+{
+    fps = cuadros;
+    cuadros = 0;
+    emit cambiarFPS(fps);
+}
 
 void MyGLDrawer::_checkForCgError(const char *situation)
 {
@@ -123,92 +136,76 @@ void MyGLDrawer::_cargar_texturas()
 void MyGLDrawer::cambiarUsa1()
 {
     fArrayParameters[0][0] =  fArrayParameters[0][0] == 1 ? 0 : 1;
-    updateGL();
 }
 
 void MyGLDrawer::cambiarUsa2()
 {
     fArrayParameters[0][1] =  fArrayParameters[0][1] == 1 ? 0 : 1;
-    updateGL();
 }
 
 void MyGLDrawer::cambiarUsa3()
 {
     fArrayParameters[0][2] =  fArrayParameters[0][2] == 1 ? 0 : 1;
-    updateGL();
 }
 
 void MyGLDrawer::cambiarAmplitud1(int amplitudParam)
 {
     fArrayParameters[1][0] = (float)amplitudParam/100;
-    updateGL();
 }
 
 void MyGLDrawer::cambiarAmplitud2(int amplitudParam)
 {
-    fArrayParameters[1][1] = (float)amplitudParam/100;    updateGL();
+    fArrayParameters[1][1] = (float)amplitudParam/100;
 }
 
 void MyGLDrawer::cambiarAmplitud3(int amplitudParam)
 {
     fArrayParameters[1][2] = (float)amplitudParam/100;
-    updateGL();
 }
 
 void MyGLDrawer::cambiarTurb1(int turbParam)
 {
     fArrayParameters[2][0] = (float)turbParam/100;
-    updateGL();
 }
 
 void MyGLDrawer::cambiarTurb2(int turbParam)
 {
     fArrayParameters[2][1] = (float)turbParam/100;
-    updateGL();
 }
 
 void MyGLDrawer::cambiarTurb3(int turbParam)
 {
     fArrayParameters[2][2] = (float)turbParam/100;
-    updateGL();
 }
 
 void MyGLDrawer::cambiarFrecuencia1(int frec)
 {
     fArrayParameters[3][0] = (float)frec;
-    updateGL();
 }
 
 void MyGLDrawer::cambiarFrecuencia2(int frec)
 {
-    fArrayParameters[3][1] = (float)frec;
-    updateGL();
-}
+    fArrayParameters[3][1] = (float)frec;}
 
 void MyGLDrawer::cambiarFrecuencia3(int frec)
 {
     fArrayParameters[3][2] = (float)frec;
-    updateGL();
 }
 
 void MyGLDrawer::cambiarIntensidad1(int intens)
 {
     fArrayParameters[4][0] = (float)intens/100;
-    updateGL();
 }
 
 void MyGLDrawer::cambiarIntensidad2(int intens)
 {
     fArrayParameters[4][1] = (float)intens/100;
-    updateGL();
 }
 
 void MyGLDrawer::cambiarIntensidad3(int intens)
 {
     fArrayParameters[4][2] = (float)intens/100;
-    updateGL();
 }
-
 
 
 ////////
@@ -216,68 +213,57 @@ void MyGLDrawer::cambiarIntensidad3(int intens)
 void MyGLDrawer::cambiarAngulo1(int angParam)
 {
     vArrayParameters[0][0] = (float)angParam/100;
-    updateGL();
 }
 
 void MyGLDrawer::cambiarAngulo2(int angParam)
 {
     vArrayParameters[0][1] = (float)angParam/100;
-    updateGL();
 }
 
 void MyGLDrawer::cambiarAngulo3(int angParam)
 {
     vArrayParameters[0][2] = (float)angParam/100;
-    updateGL();
 }
 
 void MyGLDrawer::cambiarDesplazamiento_u1(int d)
 {
     vArrayParameters[1][0] = (float)d/100;
-    updateGL();
 }
 
 void MyGLDrawer::cambiarDesplazamiento_u2(int d)
 {
     vArrayParameters[1][1] = (float)d/100;
-    updateGL();
 }
 
 void MyGLDrawer::cambiarDesplazamiento_u3(int d)
 {
     vArrayParameters[1][2] = (float)d/100;
-    updateGL();
 }
 
 void MyGLDrawer::cambiarDesplazamiento_v1(int d)
 {
     vArrayParameters[2][0] = (float)d/100;
-    updateGL();
 }
 
 void MyGLDrawer::cambiarDesplazamiento_v2(int d)
 {
     vArrayParameters[2][1] = (float)d/100;
-    updateGL();
 }
 
 void MyGLDrawer::cambiarDesplazamiento_v3(int d)
 {
     vArrayParameters[2][2] = (float)d/100;
-    updateGL();
 }
 
 
 void MyGLDrawer::cambiarCombina1(int d)
 {
     cArrayParameters[0] = d;
-    updateGL();
 }
 
 void MyGLDrawer::cambiarCombina2(int d)
 {
     cArrayParameters[1] = d;
-    updateGL();
 }
 
 
@@ -295,6 +281,11 @@ QSize MyGLDrawer::sizeHint() const
 
 void MyGLDrawer::initializeGL()
 {   
+
+    timer = new QTimer(this);
+    connect(timer, SIGNAL(timeout()), this, SLOT(updateGL()));
+    timer->start();
+
     glClearColor(0.3, 0.3, 0.3, 0.0);
 
     glEnable(GL_DEPTH_TEST);
@@ -402,6 +393,8 @@ void MyGLDrawer::initializeGL()
 
 void MyGLDrawer::paintGL()
 {
+    cuadros++;
+
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     for (int i = 0; i< CANT_T_PARAMETERS; i++) {

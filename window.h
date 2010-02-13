@@ -6,6 +6,7 @@
 #include <qpushbutton.h>
 #include <qslider.h>
 #include <QComboBox>
+#include <QTimer>
 
 // cantidad de texturas en la base
 #define CANT 3
@@ -16,6 +17,9 @@ class Window : public QWidget
 
     public:
         Window();
+
+    public slots:
+        void cambiarFPS( int );
 
     private:	
         QGLWidget *mygldrawer;
@@ -41,5 +45,10 @@ class Window : public QWidget
         QPushButton *usaButtons[CANT];
 
         QComboBox *combinaButtons[CANT-1];
+
+        QTimer *timer;
+        QLabel *tiempoLabel;
+        QString *tiempoStr;
+        QString *fpsStr;
 
     };

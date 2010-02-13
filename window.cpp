@@ -6,11 +6,33 @@
 #include <qslider.h>
 #include <QGroupBox>
 #include <QComboBox>
+#include <QTimer>
 
+void Window::cambiarFPS( int fps )
+{
+    tiempoStr->clear();
+    tiempoStr->append("FPS: ");
+    tiempoLabel->setText( tiempoStr->append(fpsStr->setNum(fps)));
+}
 
 Window::Window()
 {
-    mygldrawer = new MyGLDrawer;
+    mygldrawer = new MyGLDrawer(this);
+
+    timer = new QTimer(this);
+    connect(timer, SIGNAL(timeout()), mygldrawer, SLOT(update()));
+    timer->start(1000);
+
+    connect(mygldrawer, SIGNAL(cambiarFPS(int)), this, SLOT(cambiarFPS(int)));
+
+    tiempoLabel = new QLabel;
+
+    QFont f("Helvetica", 14, QFont::Bold);
+    tiempoLabel->setFont(f);
+
+    tiempoStr = new QString;
+    fpsStr = new QString;
+
 
     for(int i = 0; i < CANT; i++) {
 
@@ -217,6 +239,7 @@ Window::Window()
     usaLayout->addWidget(usaButtons[2],i++);
     usaLayout->addLayout(desplULayout, i++);
     usaLayout->addLayout(desplVLayout, i++);
+    usaLayout->addWidget(tiempoLabel,i++);
     usaLayout->addStretch(100);
 
 	i = 0;
