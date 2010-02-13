@@ -66,19 +66,11 @@ float4 main(
 	): COLOR 
 {
 
-    //float base[CANT];
-
-    //base[0] = tex2D(textura0, coord0);
-
-    //base[1] = tex2D(textura1, coord1);
-
-
-
-    float n = tex2D(textura0, float2(mod(coord3.x,256),coord3.y));
-    float n2 = tex2D(textura0, float2(mod(coord3.x,256)/2,mod(coord3.y,256)/2));
-    float n4 = tex2D(textura0, float2(mod(coord3.x,256)/4,mod(coord3.y,256)/4));
-    float n8 = tex2D(textura0, float2(mod(coord3.x,256)/8,mod(coord3.y,256)/8));
-    float n16 =  tex2D(textura0, float2(mod(coord3.x,256)/16,mod(coord3.y,256)/16));
+    float n = tex2D(textura0, float2(coord3.x,coord3.y));
+    float n2 = tex2D(textura0, float2(coord3.x/2,coord3.y/2));
+    float n4 = tex2D(textura0, float2(coord3.x/4,coord3.y/4));
+    float n8 = tex2D(textura0, float2(coord3.x/8,coord3.y/8));
+    float n16 =  tex2D(textura0, float2(coord3.x/16,coord3.y/16));
 	
     float4 color;
 
@@ -88,31 +80,27 @@ float4 main(
     float turbulencia1 = turb[1] * noise;
     float turbulencia2 = turb[2] * noise;
 
+    // la turbulencia no depende de la escala
     float2 c0 = coord0 + float2(turbulencia0,turbulencia0);
-
     float2 c1 = coord1 + float2(turbulencia1,turbulencia1);
     float2 c2 = coord2 + float2(turbulencia2,turbulencia2);
 
-    float xf = escala_u[0]*(c0.x-0.5*turb[0]);
-    
+    float xf = escala_u[0]*c0.x;    
     float xf2 = escala_u[1]*c1.x;
     float xf3 = escala_u[2]*c2.x;
 
     int icx = (int)c2.x;
 
-    // la turbulencia no depende de la escala
-    float2 r = _rotar((escala_u[0]/1.5)*c0,1.57);
+    //float2 r = _rotar((escala_u[0]/1.5)*c0,1.57);
 
-    float2 r2 = _rotar((escala_u[1]/1.5)*c1,1.57);
+    //float2 r2 = _rotar((escala_u[1]/1.5)*c1,1.57);
 
-//    float b1 = (sin(xf)+1)/2;
-//    float b2 = (sin(xf2)+1)/2;
     float b1 = (sin(xf)+1)/2;
     float b2 = (sin(xf2)+1)/2;
     float b3 = (sin(xf3)+1)/2;
 
-    float t1 = intensidad[0]*b1;
-    float t2 = intensidad[1]*b2;
+    float t1 = intensidad[0]*pow(b1,amplitud[0]);
+    float t2 = intensidad[1]*pow(b2,amplitud[1]);
     float t3 = intensidad[2]*pow(b3,amplitud[2]);
 
     float3 col1 = float3(usa[0] ? intensidad[0]*t1: 0, 0,0);
@@ -131,10 +119,10 @@ float4 main(
 
     float sb3 = saturate(b3);
 
-//    color.xyz = sb3;// + float3(0.4,0.1,0);
-   float i = sobre(sb3,0);
+    color.xyz = sb3;// + float3(0.4,0.1,0);
+    //float i = sobre(sb3,0);
 
-    color.xyz = i > 0.2 ? i + float3(0.6,0.2,0.2) : 0;
+    //color.xyz = i > 0.2 ? i + float3(0.6,0.2,0.2) : 0;
 
     color.a = 1;
 
