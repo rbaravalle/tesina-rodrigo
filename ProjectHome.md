@@ -1,0 +1,1 @@
+Se desarrolla un framework para representar distintos materiales como madera y granito usando el GPU.
